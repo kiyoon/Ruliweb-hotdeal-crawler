@@ -68,7 +68,10 @@ if __name__ == "__main__":
         html = search.text
         soup = BeautifulSoup(html, 'html.parser')
         search_res = soup.select('#board_read > div > div.board_main > div.board_main_view > div.source_url > a')
-        source_url = search_res[0].text.strip()
+        try:
+            source_url = search_res[0].text.strip()
+        except IndexError:
+            source_url = ""
 
         # board content
         search_res = soup.select('#board_read > div > div.board_main > div.board_main_view > div.view_content')
@@ -78,7 +81,7 @@ if __name__ == "__main__":
         search_res = soup.select('#board_read > div > div.board_main > div.board_main_view > div.row > div > div > div.like > span')
         likes = search_res[0].text.strip()
     
-        # likes
+        # dislikes
         search_res = soup.select('#board_read > div > div.board_main > div.board_main_view > div.row > div > div > div.dislike > span')
         dislikes = search_res[0].text.strip()
 
