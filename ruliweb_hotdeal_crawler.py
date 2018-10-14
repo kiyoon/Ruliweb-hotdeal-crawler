@@ -16,14 +16,21 @@ if __name__ == "__main__":
     search = requests.get(search_url)
     html = search.text
     soup = BeautifulSoup(html, 'html.parser')
+
+    # announcement counting
+    search_res = soup.select('#board_list > div > div.board_main.theme_default > table > tbody > tr > td.subject > a')
+    num_announcement = len(search_res)
+
+    # id
     search_res = soup.select('#board_list > div > div.board_main.theme_default > table > tbody > tr.table_body > td.id')
     id_list = []
-    for res in search_res[5:]:
+    for res in search_res[num_announcement:]:
         id_list.append(res.text.strip())
 
-    search = requests.get(search_url)
-    html = search.text
-    soup = BeautifulSoup(html, 'html.parser')
+#    search = requests.get(search_url)
+#    html = search.text
+#    soup = BeautifulSoup(html, 'html.parser')
+    # title
     search_res = soup.select('#board_list > div > div.board_main.theme_default > table > tbody > tr > td.subject > div > a')
     title_list = []
     for res in search_res:

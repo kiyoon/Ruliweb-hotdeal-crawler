@@ -7,4 +7,5 @@
 도서문화
 도서문상
 GTX
-
+RTX
+GeForce
