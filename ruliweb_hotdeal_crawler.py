@@ -18,11 +18,12 @@ if __name__ == "__main__":
     soup = BeautifulSoup(html, 'html.parser')
 
     # announcement counting
-    search_res = soup.select('#board_list > div > div.board_main.theme_default > table > tbody > tr > td.subject > a')
+#    search_res = soup.select('#board_list > div > div.board_main.theme_default > table > tbody > tr > td.subject > a')
+    search_res = soup.select('#board_list > div > div.board_main.theme_default.theme_white > table > tbody > tr > td.subject > a')
     num_announcement = len(search_res)
 
     # id
-    search_res = soup.select('#board_list > div > div.board_main.theme_default > table > tbody > tr.table_body > td.id')
+    search_res = soup.select('#board_list > div > div.board_main.theme_default.theme_white > table > tbody > tr.table_body > td.id')
     id_list = []
     for res in search_res[num_announcement:]:
         id_list.append(res.text.strip())
@@ -31,7 +32,7 @@ if __name__ == "__main__":
 #    html = search.text
 #    soup = BeautifulSoup(html, 'html.parser')
     # title
-    search_res = soup.select('#board_list > div > div.board_main.theme_default > table > tbody > tr > td.subject > div > a')
+    search_res = soup.select('#board_list > div > div.board_main.theme_default.theme_white > table > tbody > tr > td.subject > div > a')
     title_list = []
     for res in search_res:
         title_list.append(res.text)
@@ -89,11 +90,12 @@ if __name__ == "__main__":
         likes = search_res[0].text.strip()
     
         # dislikes
-        search_res = soup.select('#board_read > div > div.board_main > div.board_main_view > div.row > div > div > div.dislike > span')
-        dislikes = search_res[0].text.strip()
+#        search_res = soup.select('#board_read > div > div.board_main > div.board_main_view > div.row > div > div > div.dislike > span')
+#        dislikes = search_res[0].text.strip()
 
         mail_title = 'Ruliweb Hotdeal: ' + deal_title
-        mail_body = 'Board URL: %s\nLikes: %s\nDislikes: %s\n\nSource URL: %s\n\n%s' % (deal_url, likes, dislikes, source_url, content)
+#        mail_body = 'Board URL: %s\nLikes: %s\nDislikes: %s\n\nSource URL: %s\n\n%s' % (deal_url, likes, dislikes, source_url, content)
+        mail_body = 'Board URL: %s\nLikes: %s\n\nSource URL: %s\n\n%s' % (deal_url, likes, source_url, content)
         mail_request = requests.post(request_url, auth=('api', mailgun_key), data={
             'from': 'fcserver <fcserver-noreply@kiyoon.kim>',
             'to': mailgun_recipient,
