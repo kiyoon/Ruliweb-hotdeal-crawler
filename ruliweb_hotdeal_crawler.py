@@ -65,10 +65,16 @@ if __name__ == "__main__":
 
     config = ConfigParser()
     config.read(os.path.join(__location__, "key.ini"))
+    mailgun_enable = config['Mailgun']['enable'] == 'True'
     mailgun_key = config['Mailgun']['key']
     mailgun_sandbox = config['Mailgun']['sandbox']
     mailgun_recipient = config['Mailgun']['recipient']
-    request_url = 'https://api.mailgun.net/v3/{0}/messages'.format(mailgun_sandbox)
+    mailgun_request_url = 'https://api.mailgun.net/v3/{0}/messages'.format(mailgun_sandbox)
+
+    telegram_enable = config['Telegram']['enable'] == 'True'
+    telegram_token = config['Telegram']['token']
+    telegram_chat_ids = config['Telegram']['chat_ids'].split(",")
+    telegram_request_url = 'https://api.telegram.org/bot{0}/sendMessage'.format(telegram_token)
 
     for deal_title, deal_url in zip(deal_titles, deal_urls):
         # item URL
@@ -93,16 +99,26 @@ if __name__ == "__main__":
 #        search_res = soup.select('#board_read > div > div.board_main > div.board_main_view > div.row > div > div > div.dislike > span')
 #        dislikes = search_res[0].text.strip()
 
-        mail_title = 'Ruliweb Hotdeal: ' + deal_title
-#        mail_body = 'Board URL: %s\nLikes: %s\nDislikes: %s\n\nSource URL: %s\n\n%s' % (deal_url, likes, dislikes, source_url, content)
-        mail_body = 'Board URL: %s\nLikes: %s\n\nSource URL: %s\n\n%s' % (deal_url, likes, source_url, content)
-        mail_request = requests.post(request_url, auth=('api', mailgun_key), data={
-            'from': 'fcserver <fcserver-noreply@kiyoon.kim>',
-            'to': mailgun_recipient,
-            'subject': mail_title,
-            'text': mail_body
-            })
+        if mailgun_enable:
+            mail_title = 'Ruliweb Hotdeal: ' + deal_title
+    #        mail_body = 'Board URL: %s\nLikes: %s\nDislikes: %s\n\nSource URL: %s\n\n%s' % (deal_url, likes, dislikes, source_url, content)
+            mail_body = 'Board URL: %s\nLikes: %s\n\nSource URL: %s\n\n%s' % (deal_url, likes, source_url, content)
+            mail_request = requests.post(mailgun_request_url, auth=('api', mailgun_key), data={
+                'from': 'fcserver <fcserver-noreply@kiyoon.kim>',
+                'to': mailgun_recipient,
+                'subject': mail_title,
+                'text': mail_body
+                })
 
+        if telegram_enable:
+            for chat_id in telegram_chat_ids:
+                tg_title = 'Ruliweb Hotdeal: ' + deal_title
+        #        mail_body = 'Board URL: %s\nLikes: %s\nDislikes: %s\n\nSource URL: %s\n\n%s' % (deal_url, likes, dislikes, source_url, content)
+                tg_body = tg_title + '\n\nBoard URL: %s\nLikes: %s\n\nSource URL: %s\n\n%s' % (deal_url, likes, source_url, content)
+                tg_request = requests.post(telegram_request_url, data={
+                    'chat_id': chat_id,
+                    'text': tg_body
+                    })
 
     # update last id that is seen
     with open(os.path.join(__location__, "last_id.txt"),'w') as f:

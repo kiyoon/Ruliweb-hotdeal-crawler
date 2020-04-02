@@ -9,3 +9,5 @@
 GTX
 RTX
 GeForce
+Steam
+스팀
