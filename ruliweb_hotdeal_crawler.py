@@ -75,6 +75,12 @@ if __name__ == "__main__":
     telegram_token = config['Telegram']['token']
     telegram_chat_ids = config['Telegram']['chat_ids'].split(",")
     telegram_request_url = 'https://api.telegram.org/bot{0}/sendMessage'.format(telegram_token)
+    def telegram_post(telegram_request_url, chat_id, text, parse_mode=None):
+        return requests.post(telegram_request_url, data={
+            'chat_id': chat_id,
+            'text': text,
+            'parse_mode': parse_mode
+            })
 
     for deal_title, deal_url in zip(deal_titles, deal_urls):
         # item URL
@@ -112,13 +118,16 @@ if __name__ == "__main__":
 
         if telegram_enable:
             for chat_id in telegram_chat_ids:
-                tg_title = 'Ruliweb Hotdeal: ' + deal_title
-        #        mail_body = 'Board URL: %s\nLikes: %s\nDislikes: %s\n\nSource URL: %s\n\n%s' % (deal_url, likes, dislikes, source_url, content)
-                tg_body = tg_title + '\n\nBoard URL: %s\nLikes: %s\n\nSource URL: %s\n\n%s' % (deal_url, likes, source_url, content)
-                tg_request = requests.post(telegram_request_url, data={
-                    'chat_id': chat_id,
-                    'text': tg_body
-                    })
+                tg_title = '<b>Ruliweb Hotdeal: ' + deal_title + '</b>'
+        #        tg_body = 'Board URL: %s\nLikes: %s\nDislikes: %s\n\nSource URL: %s\n\n%s' % (deal_url, likes, dislikes, source_url, content)
+                tg_body = 'Board URL: %s\nLikes: %s\n\nSource URL: %s\n\n%s' % (deal_url, likes, source_url, content)
+                tg_request = telegram_post(telegram_request_url, chat_id, tg_title + '\n\n' + tg_body, parse_mode = 'HTML')
+                if not tg_request.ok:
+                    # If failed, try send normal text instead of HTML parsing
+                    tg_title = 'Ruliweb Hotdeal: ' + deal_title
+                    tg_request = telegram_post(telegram_request_url, chat_id, tg_title + '\n\n' + tg_body, parse_mode = None)
+
+
 
     # update last id that is seen
     with open(os.path.join(__location__, "last_id.txt"),'w') as f:
