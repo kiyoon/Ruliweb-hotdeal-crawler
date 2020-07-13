@@ -5,8 +5,31 @@ from itertools import compress
 import sys, os
 from configparser import ConfigParser
 
+__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
+config = ConfigParser()
+config.read(os.path.join(__location__, "key.ini"))
+mailgun_enable = config['Mailgun']['enable'] == 'True'
+mailgun_key = config['Mailgun']['key']
+mailgun_sandbox = config['Mailgun']['sandbox']
+mailgun_recipient = config['Mailgun']['recipient']
+mailgun_request_url = 'https://api.mailgun.net/v3/{0}/messages'.format(mailgun_sandbox)
+
+telegram_enable = config['Telegram']['enable'] == 'True'
+telegram_token = config['Telegram']['token']
+telegram_chat_ids = config['Telegram']['chat_ids'].split(",")
+telegram_request_url = 'https://api.telegram.org/bot{0}/sendMessage'.format(telegram_token)
+
+
+def telegram_post(telegram_request_url, chat_id, text, parse_mode=None):
+    return requests.post(telegram_request_url, data={
+        'chat_id': chat_id,
+        'text': text,
+        'parse_mode': parse_mode
+        })
+
+
 if __name__ == "__main__":
-    __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
     with open(os.path.join(__location__, "last_id.txt"),'r') as f:
         last_id = int(f.read().strip())
@@ -33,10 +56,16 @@ if __name__ == "__main__":
 #    html = search.text
 #    soup = BeautifulSoup(html, 'html.parser')
     # title
-    search_res = soup.select('#board_list > div > div.board_main.theme_default.theme_white > table > tbody > tr > td.subject > div > a')
+    search_res = soup.select('#board_list > div > div.board_main.theme_default.theme_white > table > tbody > tr > td.subject > div > a.deco')
     title_list = []
     for res in search_res:
         title_list.append(res.text)
+
+    if len(id_list) != len(title_list):
+        error_msg = "len(id_list) != len(title_list). The UI of the board may have been updated."
+        print(error_msg)
+        error_title = "<b>Ruliweb Hotdeal Crawler: Error</b>"
+        telegram_post(telegram_request_url, telegram_chat_ids[0], error_title + '\n\n' + error_msg, parse_mode = 'HTML')
 
     # filter not seen
     filt = list(map(lambda x: int(x[0]) > last_id, zip(id_list, title_list)))
@@ -64,24 +93,6 @@ if __name__ == "__main__":
 
     print(deal_titles)
 
-    config = ConfigParser()
-    config.read(os.path.join(__location__, "key.ini"))
-    mailgun_enable = config['Mailgun']['enable'] == 'True'
-    mailgun_key = config['Mailgun']['key']
-    mailgun_sandbox = config['Mailgun']['sandbox']
-    mailgun_recipient = config['Mailgun']['recipient']
-    mailgun_request_url = 'https://api.mailgun.net/v3/{0}/messages'.format(mailgun_sandbox)
-
-    telegram_enable = config['Telegram']['enable'] == 'True'
-    telegram_token = config['Telegram']['token']
-    telegram_chat_ids = config['Telegram']['chat_ids'].split(",")
-    telegram_request_url = 'https://api.telegram.org/bot{0}/sendMessage'.format(telegram_token)
-    def telegram_post(telegram_request_url, chat_id, text, parse_mode=None):
-        return requests.post(telegram_request_url, data={
-            'chat_id': chat_id,
-            'text': text,
-            'parse_mode': parse_mode
-            })
 
     for deal_title, deal_url in zip(deal_titles, deal_urls):
         # item URL
