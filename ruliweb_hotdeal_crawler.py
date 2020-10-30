@@ -105,7 +105,12 @@ if __name__ == "__main__":
 
             # likes
             search_res = soup.select('#board_read > div > div.board_main > div.board_main_view > div.row > div > div > div.like > span')
-            likes = search_res[0].text.strip()
+
+            if len(search_res) > 0:
+                likes = search_res[0].text.strip()
+            else:
+                likes = -1
+
         
             # dislikes
     #        search_res = soup.select('#board_read > div > div.board_main > div.board_main_view > div.row > div > div > div.dislike > span')
