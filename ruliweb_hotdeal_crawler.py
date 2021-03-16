@@ -39,7 +39,8 @@ if __name__ == "__main__":
         # announcement counting
     #    search_res = soup.select('#board_list > div > div.board_main.theme_default > table > tbody > tr > td.subject > a')
         #search_res = soup.select('#board_list > div > div.board_main.theme_default.theme_white > table > tbody > tr > td.subject > a')
-        search_res = soup.select('#board_list > div > div.board_main.theme_default.theme_white > table > tbody > tr > td.subject > a > strong')
+        #search_res = soup.select('#board_list > div > div.board_main.theme_default.theme_white > table > tbody > tr > td.subject > a > strong')
+        search_res = soup.select('#board_list > div > div.board_main.theme_default.theme_white > table > tbody > tr > td.subject > a.deco')
         num_announcement = len(search_res)
 
         # id
